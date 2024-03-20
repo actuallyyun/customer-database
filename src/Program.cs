@@ -47,6 +47,16 @@ class Program{
         var customer3Id=CustomerDatabase.FindCustomerByEmail("davidjohnson@example.com").Id;
         Console.WriteLine("Should print: invalid email.");
         customerDB.UpdateCustomer(customer3Id,customer2);
+
+        // undo add action
+        customerDB.Undo();
+        var customer3Found=CustomerDatabase.FindCustomerByEmail("davidjohnson@example.com");
+        Console.WriteLine($"Cutomer 3 should not be found:{customer3Found is null}");
+
+
+        
+        
+
         
         
 

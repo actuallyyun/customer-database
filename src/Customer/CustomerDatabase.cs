@@ -1,17 +1,14 @@
-using System;
+
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace src.Customer
 {
     public class CustomerDatabase : IEnumerable<Customer>
     {
-        private static HashSet<Customer> _customers = new();
+        private static HashSet<Customer> _customers = new();   
 
-        private static Stack <UserAction>_userActions=new();
-        
+        private Stack<Action>_undoStack=new();
+        private Stack<Action>_redoStack=new();
 
         public IEnumerator<Customer> GetEnumerator()
         {
@@ -52,7 +49,10 @@ namespace src.Customer
             Console.WriteLine(
                 $"Customer added. {customerToAdd.FirstName} {customerToAdd.LastName}"
             );
-            _userActions.Push(new UserAction("AddCustomer",newCustomer));
+            
+            Action undo=()=>_customers.Remove(newCustomer);
+            _undoStack.Push(undo);
+            //UserAction.AddAction(new UserAction("add",newCustomer));
             
             return;
         }
@@ -68,7 +68,9 @@ namespace src.Customer
             }
 
             _customers.Remove(foundCustomer);
-            _userActions.Push(new UserAction("DeleteCustomer",id));
+            Action undo=()=>_customers.Add(foundCustomer);
+            _undoStack.Push(undo);
+            //UserAction.AddAction(new UserAction("delete",id));
 
             Console.WriteLine($"Customer with id:{id} removed.");
         }
@@ -77,6 +79,7 @@ namespace src.Customer
         public bool UpdateCustomer(Guid id, CustomerCreateDTO customerUpdate)
         {
             var foundCustomer = SearchCustomerById(id);
+            var originalCustomer=foundCustomer;
             if (foundCustomer is null)
             {
                 Console.WriteLine("Cannot update.");
@@ -84,7 +87,10 @@ namespace src.Customer
             }
             try{
                 foundCustomer.UpdateCustomer(customerUpdate);
-                            _userActions.Push(new UserAction("UpdateCustomer",id));
+                            //UserAction.AddAction(new UserAction("update",id));
+                Action undo=()=>foundCustomer.UpdateCustomer(new CustomerCreateDTO(originalCustomer.FirstName,
+                originalCustomer.LastName,originalCustomer.Email,originalCustomer.Address));
+                _undoStack.Push(undo);
 
             Console.WriteLine($"Updated successfully.\n{customerUpdate}");
             return true;
@@ -94,6 +100,20 @@ namespace src.Customer
             };
 
         }
+
+        public void Undo(){
+            _undoStack.TryPop(out Action action);
+            if(action is not null){
+                _redoStack.Push(action);
+                action.Invoke();
+            }
+           
+        }
+
+        public void Redo(){
+            // implement redo
+        }
+
         public static Customer? SearchCustomerById(Guid id)
         {
             return _customers.FirstOrDefault(customer => customer.Id == id);
