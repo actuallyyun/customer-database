@@ -120,5 +120,11 @@ class Program
         customerDB.Undo();
         var customer3Found = CustomerDatabase.FindCustomerByEmail("davidjohnson@example.com");
         Console.WriteLine($"Cutomer 3 should not be found:{customer3Found is null}");
+
+        Console.WriteLine("\n########Test Redo #########\n");
+        customerDB.Redo();
+        var customer3FoundRedo = CustomerDatabase.FindCustomerByEmail("davidjohnson@example.com");
+        Console.WriteLine($"Cutomer 3 should  be found:{customer3FoundRedo is not null}");
+
     }
 }

@@ -6,8 +6,8 @@ namespace src.Customer
     {
         private static HashSet<Customer> _customers = new();
 
-        private Stack<Action> _undoStack = new();
-        private Stack<Action> _redoStack = new();
+        private Stack<Command> _undoStack = new();
+        private Stack<Command> _redoStack = new();
 
         public IEnumerator<Customer> GetEnumerator()
         {
@@ -31,7 +31,7 @@ namespace src.Customer
         {
             if (FindCustomerByEmail(customerToAdd.Email) is not null)
             {
-               throw new ExceptionHandler.InvalidEmailException("Invalid email");
+                throw new ExceptionHandler.InvalidEmailException("Invalid email");
             }
             if (hasNullField(customerToAdd))
             {
@@ -50,7 +50,9 @@ namespace src.Customer
             );
 
             Action undo = () => _customers.Remove(newCustomer);
-            _undoStack.Push(undo);
+            Action redo = () => _customers.Add(newCustomer);
+            var command = new Command(undo, redo);
+            _undoStack.Push(command);
             //UserAction.AddAction(new UserAction("add",newCustomer));
             UpdateDB();
             return;
@@ -67,7 +69,8 @@ namespace src.Customer
 
             _customers.Remove(foundCustomer);
             Action undo = () => _customers.Add(foundCustomer);
-            _undoStack.Push(undo);
+            Action redo = () => _customers.Remove(foundCustomer);
+            _undoStack.Push(new Command(undo, redo));
             //UserAction.AddAction(new UserAction("delete",id));
             UpdateDB();
             Console.WriteLine($"Customer with id:{id} removed.");
@@ -94,7 +97,8 @@ namespace src.Customer
                             originalCustomer.Address
                         )
                     );
-                _undoStack.Push(undo);
+                Action redo = () => foundCustomer.UpdateCustomer(customerUpdate);
+                _undoStack.Push(new Command(undo, redo));
 
                 UpdateDB();
                 Console.WriteLine($"Updated successfully.\n{customerUpdate}");
@@ -110,17 +114,21 @@ namespace src.Customer
 
         public void Undo()
         {
-            _undoStack.TryPop(out Action action);
-            if (action is not null)
+            _undoStack.TryPop(out Command command);
+            if (command is not null)
             {
-                _redoStack.Push(action);
-                action.Invoke();
+                command.undo();
+                _redoStack.Push(command);
             }
         }
 
         public void Redo()
         {
-            // implement redo
+            _undoStack.TryPop(out Command command);
+            if (command is not null)
+            {
+                command.redo();
+            }
         }
 
         public static void UpdateDB()

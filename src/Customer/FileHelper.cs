@@ -37,12 +37,10 @@ namespace src.Customer
         }
 
         public async static void WriteFileAsync(IEnumerable<Customer> customers){
-            Console.WriteLine("called");
             string path="src/customers_db.csv";
 
             // if it doesn't exit, create the file and write data
             if(!File.Exists(path)){
-                Console.WriteLine("file does not exist");
                 using (StreamWriter sw=File.CreateText(path)){
                     string header=$"";
                     sw.WriteLine("Id,FirstName,LastName,Email,Address"); //write header. hardcoded, should get it from customers
