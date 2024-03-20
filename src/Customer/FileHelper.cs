@@ -15,14 +15,14 @@ namespace src.Customer
             {
                 using (var reader = new StreamReader(path))
                 {
+                    // first line is header, parse header
+                    var header= reader.ReadLine();
+                    
                     string line;
                     while ((line = reader.ReadLine()) is not null)
                     {
-                        // parse header
+
                         string[] args = line.Split(",");
-                        
-                        
-                        Console.WriteLine(args[0]);
                         Guid id= Guid.Parse(args[0]);
                         Customer customer = new Customer(args[1], args[2], args[3],args[4],id);
                         CustomerDatabase.InitiateDatabase(customer);

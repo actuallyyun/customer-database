@@ -10,6 +10,9 @@ namespace src.Customer
     {
         private static HashSet<Customer> _customers = new();
 
+        private static Stack <UserAction>_userActions=new();
+        
+
         public IEnumerator<Customer> GetEnumerator()
         {
             foreach (var customer in _customers)
@@ -26,9 +29,9 @@ namespace src.Customer
         public static void InitiateDatabase(Customer customer){
             _customers.Add(customer);
         }
-        public static void AddCustomer(CustomerCreateDTO customerToAdd)
+        public  void AddCustomer(CustomerCreateDTO customerToAdd)
         {
-            if (isEmailFound(customerToAdd))
+            if (FindCustomerByEmail(customerToAdd.Email) is not null)
             {
                 Console.WriteLine("Can not add customer.");
                 return;
@@ -49,35 +52,58 @@ namespace src.Customer
             Console.WriteLine(
                 $"Customer added. {customerToAdd.FirstName} {customerToAdd.LastName}"
             );
+            _userActions.Push(new UserAction("AddCustomer",newCustomer));
+            
             return;
         }
 
-        public static void DeleteCustomer(Guid id)
+        public void DeleteCustomer(Guid id)
         {
             var foundCustomer = SearchCustomerById(id);
             
             if (foundCustomer is null)
             {
                 Console.WriteLine("Cannot remove.");
+                return;
             }
 
             _customers.Remove(foundCustomer);
+            _userActions.Push(new UserAction("DeleteCustomer",id));
+
             Console.WriteLine($"Customer with id:{id} removed.");
         }
 
+
+        public bool UpdateCustomer(Guid id, CustomerCreateDTO customerUpdate)
+        {
+            var foundCustomer = SearchCustomerById(id);
+            if (foundCustomer is null)
+            {
+                Console.WriteLine("Cannot update.");
+                return false;
+            }
+            try{
+                foundCustomer.UpdateCustomer(customerUpdate);
+                            _userActions.Push(new UserAction("UpdateCustomer",id));
+
+            Console.WriteLine($"Updated successfully.\n{customerUpdate}");
+            return true;
+                }catch(Exception e){
+                    Console.WriteLine(e.Message);
+                    return false;
+            };
+
+        }
         public static Customer? SearchCustomerById(Guid id)
         {
             return _customers.FirstOrDefault(customer => customer.Id == id);
         }
 
-        public static bool isEmailFound(CustomerCreateDTO customerCreate)
+        public static Customer? FindCustomerByEmail(string email)
         {
-            var foundEmail = _customers.Select(customer =>
-                customer.Email.ToLower() == customerCreate.Email.ToLower()
-            );
-            if (foundEmail is null)
-                return false;
-            return true;
+            return   _customers.FirstOrDefault(customer =>
+                customer.Email.ToLower() == email.ToLower());
+
         }
 
         public static bool hasNullField(CustomerCreateDTO customerCreate)

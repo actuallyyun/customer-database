@@ -2,7 +2,14 @@ namespace src.Customer
 {
     public class Customer
     {
-        public Guid Id { get; set; }
+        public Customer(Guid id, string lastName, string address) 
+        {
+            this.Id = id;
+    this.LastName = lastName;
+    this.Address = address;
+   
+        }
+                public Guid Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
@@ -18,16 +25,23 @@ namespace src.Customer
             
         }
 
-        public void UpdateCustomer(CustomerUpdateDTO customerUpdate)
+        public void UpdateCustomer(CustomerCreateDTO customerUpdate)
         {
             if (customerUpdate.FirstName is not null)
                 FirstName = customerUpdate.FirstName;
             if (customerUpdate.LastName is not null)
                 LastName = customerUpdate.LastName;
-            if (customerUpdate.Email is not null)
-                Email = customerUpdate.Email;
+            
             if (customerUpdate.Address is not null)
                 Address = customerUpdate.Address;
+                
+            if (customerUpdate.Email is not null && customerUpdate.Email.ToLower()!=Email.ToLower()&&CustomerDatabase.FindCustomerByEmail(customerUpdate.Email) is null)
+            {
+                Email = customerUpdate.Email;
+                return;
+            }else{
+                throw new Exception("Invalid email.");
+            }
         }
 
         public override string ToString()
