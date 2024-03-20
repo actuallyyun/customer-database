@@ -2,3 +2,4 @@ bin/
 obj/
 .vscode
 .DS_Store
+src/customers_db.csv

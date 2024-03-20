@@ -35,5 +35,32 @@ namespace src.Customer
                 Console.WriteLine(e.Message);
             }
         }
+
+        public async static void WriteFileAsync(IEnumerable<Customer> customers){
+            Console.WriteLine("called");
+            string path="src/customers_db.csv";
+
+            // if it doesn't exit, create the file and write data
+            if(!File.Exists(path)){
+                Console.WriteLine("file does not exist");
+                using (StreamWriter sw=File.CreateText(path)){
+                    string header=$"";
+                    sw.WriteLine("Id,FirstName,LastName,Email,Address"); //write header. hardcoded, should get it from customers
+                    foreach(var customer in customers){
+                        await sw.WriteLineAsync($"{customer.Id},{customer.FirstName},{customer.LastName},{customer.Email},{customer.Address}");
+                    }
+                }
+            }else{
+                //it exits,delete it
+                try{
+                    File.Delete(path);
+                }catch(Exception e){
+                    Console.WriteLine("Cannot delete file");
+                    Console.WriteLine(e.Message);
+                }
+                
+
+            }
+        }
     }
 }
