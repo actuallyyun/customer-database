@@ -1,15 +1,53 @@
-# Customer Database Management
+# Overview
 
-You are tasked with building a customer database application that can store and retrieve customer information. The application should allow users to add, update, delete, and search for customers using various criteria. In addition, the application should be designed to handle large amounts of data efficiently, so it should utilize appropriate structures and algorithms.
+This is a simple customer database management system that allows users to add, update, delete, and search for customers using various criteria. 
 
-## Requirements
+The application is designed to handle large amounts of data efficiently,so it utilizes the following appropriate structures and algorithms.
 
-Information of all the customers should be stored in a file called `customers.csv`. Initially, the program should read all the data from file and add data to the database. Any modification to the database should also recorded in the file `customers.csv`. The basic classes would be needed for this project (and create more if you have valid reasons to do so):
+- Read and write csv file asynchronously
+- Use LINQ to query data
+- Use HashSet to store email
+- Use Stack to store undo/redo actions
 
-1. Create `Customer` class: This class represents a customer and should contain properties such as Id, FirstName, LastName, Email, and Address. You can decide the suitable data types for each.
-2. Create `CustomerDatabase` class: This class should contain the data structure used to store customer information, such as a collection of customers. It should also contain methods for adding, reading, updating, deleting. Extra features:
-    - Email should be unique in the database.
-    - Implement a feature to search customers by their ID
-    - Implement an undo and redo feature which allows users to undo their last action or redo an action that they have undone
-3. Create `FileHelper` class: This class should contain methods for reading and writing customer information to and from the file system.
-4. Create `ExceptionHandler` class: This class should contain methods for handling exceptions that may occur during the execution of the application.
+# Getting Started
+
+To run the app, first clone the code to your local repo.
+```bash
+git clone your-fork-repo-url
+```
+
+Then, navigate to the project directory and run the following command to run the project.
+```bash 
+dotnet run 
+```
+
+I have added tests and demos in the Program.cs file. You can see the results in your terminal.
+
+![add customer](./src/images/add-test.png)
+
+![undo/redo add customer](./src//images/add-undo:redo-test.png)
+
+![update customer](./src/images/update-test.png)
+
+![delete customer](./src/images/delete-test.png)
+
+Data in `customers.csv` file is used populate the database. You can add more data to the file if you want to test the application with more data.
+
+# Features
+
+- Add a new customer
+- Update an existing customer
+- Delete a customer
+- Search for a customer by ID
+- Search for a customer by email
+- Undo the last action
+- Redo the last undone action
+- Read and write data to a csv file asynchronously
+- Custom exception handler to handle errors that may occur during the execution of the application
+- Simple Console interface to provide feedback to the user
+
+# Key design decisions
+- User email is unique. When adding or updating a user, I ensure that no user has the same email.
+- I created a Command class to capsulate the actions that can be undone and redone.
+- DTOs are used to customize propertities that are exposed to the user.
+
