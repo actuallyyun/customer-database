@@ -6,8 +6,8 @@ namespace src.Customer
     {
         private static HashSet<Customer> _customers = new();
 
-        private Stack<Command> _undoStack = new();
-        private Stack<Command> _redoStack = new();
+        private static Stack<Command> _undoStack = new();
+        private static Stack<Command> _redoStack = new();
 
         public IEnumerator<Customer> GetEnumerator()
         {
@@ -20,6 +20,10 @@ namespace src.Customer
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        public void ClearDB(){
+            _customers.Clear();
         }
 
         public static void InitiateDatabase(Customer customer)
@@ -50,7 +54,7 @@ namespace src.Customer
             );
 
             Action undo = () => _customers.Remove(newCustomer);
-            Action redo = () => _customers.Add(newCustomer);
+            Action redo = () => AddCustomer(customerToAdd);
             var command = new Command(undo, redo);
             _undoStack.Push(command);
             //UserAction.AddAction(new UserAction("add",newCustomer));
@@ -76,10 +80,12 @@ namespace src.Customer
             Console.WriteLine($"Customer with id:{id} removed.");
         }
 
-        public bool UpdateCustomer(Guid id, CustomerCreateDTO customerUpdate)
+        public bool UpdateCustomer(Guid id, CustomerUpdateDTO customerUpdate)
         {
             var foundCustomer = SearchCustomerById(id);
-            var originalCustomer = foundCustomer;
+            // Make a copy of the original customer for undo action
+            var originalCustomer = new Customer(foundCustomer.FirstName,foundCustomer.LastName,foundCustomer.Email,foundCustomer.Address,foundCustomer.Id);
+            
             if (foundCustomer is null)
             {
                 throw new ExceptionHandler.CustomerNotFoundException("Customer does not exit");
@@ -87,10 +93,10 @@ namespace src.Customer
             try
             {
                 foundCustomer.UpdateCustomer(customerUpdate);
-                //UserAction.AddAction(new UserAction("update",id));
+                
                 Action undo = () =>
                     foundCustomer.UpdateCustomer(
-                        new CustomerCreateDTO(
+                        new CustomerUpdateDTO(                          
                             originalCustomer.FirstName,
                             originalCustomer.LastName,
                             originalCustomer.Email,
@@ -98,10 +104,11 @@ namespace src.Customer
                         )
                     );
                 Action redo = () => foundCustomer.UpdateCustomer(customerUpdate);
+                
                 _undoStack.Push(new Command(undo, redo));
 
                 UpdateDB();
-                Console.WriteLine($"Updated successfully.\n{customerUpdate}");
+                Console.WriteLine($"Updated successfully.");
                 return true;
             }
             catch (Exception e)
@@ -124,10 +131,11 @@ namespace src.Customer
 
         public void Redo()
         {
-            _undoStack.TryPop(out Command command);
+            _redoStack.TryPop(out Command command);
             if (command is not null)
             {
                 command.redo();
+                _undoStack.Push(command);
             }
         }
 
@@ -161,6 +169,14 @@ namespace src.Customer
                 | customerCreate.LastName is null
                 | customerCreate.Address is null
                 | customerCreate.Email is null;
+        }
+
+        // method for debugging undo function
+        public static void PrintUndoStack(){
+            Console.WriteLine("\nUndo stack");
+            foreach(var command in _undoStack){
+                Console.WriteLine(command);
+            }
         }
     }
 }

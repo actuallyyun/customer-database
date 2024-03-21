@@ -2,7 +2,6 @@ namespace src.Customer
 {
     public class Customer
     {
-
         public Guid Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -24,8 +23,9 @@ namespace src.Customer
             Id = id ?? Guid.NewGuid();
         }
 
-        public void UpdateCustomer(CustomerCreateDTO customerUpdate)
+        public void UpdateCustomer(CustomerUpdateDTO customerUpdate)
         {
+
             if (customerUpdate.FirstName is not null)
                 FirstName = customerUpdate.FirstName;
             if (customerUpdate.LastName is not null)
@@ -34,18 +34,20 @@ namespace src.Customer
             if (customerUpdate.Address is not null)
                 Address = customerUpdate.Address;
 
-            if (
-                customerUpdate.Email is not null
-                && customerUpdate.Email.ToLower() != Email.ToLower()
-                && CustomerDatabase.FindCustomerByEmail(customerUpdate.Email) is null
-            )
+            if (customerUpdate.Email is not null)
             {
-                Email = customerUpdate.Email;
-                return;
-            }
-            else
-            {
-                throw new ExceptionHandler.InvalidEmailException("Invalid email.");
+                if (
+                    customerUpdate.Email.ToLower() == Email.ToLower()
+                    || CustomerDatabase.FindCustomerByEmail(customerUpdate.Email) is null
+                )
+                {
+                    Email = customerUpdate.Email;
+                    return;
+                }
+                else
+                {
+                    throw new ExceptionHandler.InvalidEmailException("Invalid email.");
+                }
             }
         }
 
