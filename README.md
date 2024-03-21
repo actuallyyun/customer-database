@@ -1,6 +1,6 @@
 # Overview
 
-This is a simple customer database management system that allows users to add, update, delete, and search for customers using various criteria. 
+This is a simple yet robust customer database management system that allows users to add, update, delete, and search for customers using various criteria. 
 
 The application is designed to handle large amounts of data efficiently,so it utilizes the following appropriate structures and algorithms.
 
@@ -45,6 +45,7 @@ Data in `customers.csv` file is used populate the database. You can add more dat
 - Read and write data to a csv file asynchronously
 - Custom exception handler to handle errors that may occur during the execution of the application
 - Simple Console interface to provide feedback to the user
+- - A `csv` file is used to persist data. It is updated after every action that mutates the data.
 
 # Key design decisions
 - User email is unique. When adding or updating a user, I ensure that no user has the same email.
