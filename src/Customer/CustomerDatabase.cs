@@ -22,19 +22,31 @@ namespace src.Customer
             return GetEnumerator();
         }
 
-        public void ClearDB(){
+        public void ClearDB()
+        {
             _customers.Clear();
         }
 
-        // populate db with csv data 
-        public static void InitiateDatabase(Customer customer)
+        // populate db with csv data
+        public void PopulateDatabase(string path)
         {
-            _customers.Add(customer);
+            var fh = new FileHelper(path);
+            var data = fh.ReadFile();
+            if (data is not null)
+            {
+                // transform data to Customer instance and add to db
+                foreach (var line in data)
+                {
+                    string[] customerData = line.Split(",");
+                    Customer customer = Customer.CreateCustomerFromFile(customerData);
+                    _customers.Add(customer);
+                }
+                return;
+            }else{
+                throw new Exception("Load data failed.");
+            }
+             
         }
-
-        // make AddCustomer private
-        // Undo->AddCustomer
-        //Public OnAddCustomer => {AddCustomer,ClearRedo}
 
         public void AddCustomer(CustomerCreateDTO customerToAdd)
         {
@@ -47,13 +59,7 @@ namespace src.Customer
                 throw new ExceptionHandler.NonNullableFieldException("Field must not be null.");
             }
 
-
-            Customer newCustomer = new Customer(
-                customerToAdd.FirstName,
-                customerToAdd.LastName,
-                customerToAdd.Email,
-                customerToAdd.Address
-            );
+            Customer newCustomer = Customer.CreateCustomer(customerToAdd);
             _customers.Add(newCustomer);
             Console.WriteLine(
                 $"Customer added. {customerToAdd.FirstName} {customerToAdd.LastName}"
@@ -92,8 +98,14 @@ namespace src.Customer
         {
             var foundCustomer = SearchCustomerById(id);
             // Make a copy of the original customer for undo action
-            var originalCustomer = new Customer(foundCustomer.FirstName,foundCustomer.LastName,foundCustomer.Email,foundCustomer.Address,foundCustomer.Id);
-            
+            var originalCustomer = new Customer(
+                foundCustomer.FirstName,
+                foundCustomer.LastName,
+                foundCustomer.Email,
+                foundCustomer.Address,
+                foundCustomer.Id
+            );
+
             if (foundCustomer is null)
             {
                 throw new ExceptionHandler.CustomerNotFoundException("Customer does not exit");
@@ -101,10 +113,10 @@ namespace src.Customer
             try
             {
                 foundCustomer.UpdateCustomer(customerUpdate);
-                
+
                 Action undo = () =>
                     foundCustomer.UpdateCustomer(
-                        new CustomerUpdateDTO(                          
+                        new CustomerUpdateDTO(
                             originalCustomer.FirstName,
                             originalCustomer.LastName,
                             originalCustomer.Email,
@@ -147,7 +159,7 @@ namespace src.Customer
             }
         }
 
-    // update db after each data munipulatation
+        // update db after each data munipulatation
         public static void UpdateDB()
         {
             try
@@ -181,9 +193,11 @@ namespace src.Customer
         }
 
         // method for debugging undo function
-        public static void PrintUndoStack(){
+        public static void PrintUndoStack()
+        {
             Console.WriteLine("\nUndo stack");
-            foreach(var command in _undoStack){
+            foreach (var command in _undoStack)
+            {
                 Console.WriteLine(command);
             }
         }

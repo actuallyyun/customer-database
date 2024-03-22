@@ -23,9 +23,31 @@ namespace src.Customer
             Id = id ?? Guid.NewGuid();
         }
 
+        public static Customer CreateCustomerFromFile(string[] customerData)
+        {
+            Guid id = Guid.Parse(customerData[0]);
+            Customer customer = new Customer(
+                customerData[1],
+                customerData[2],
+                customerData[3],
+                customerData[4],
+                id
+            );
+            return customer;
+        }
+
+        public static Customer CreateCustomer(CustomerCreateDTO customerCreate)
+        {
+            return new Customer(
+                customerCreate.FirstName,
+                customerCreate.LastName,
+                customerCreate.Email,
+                customerCreate.Address
+            );
+        }
+
         public void UpdateCustomer(CustomerUpdateDTO customerUpdate)
         {
-
             if (customerUpdate.FirstName is not null)
                 FirstName = customerUpdate.FirstName;
             if (customerUpdate.LastName is not null)

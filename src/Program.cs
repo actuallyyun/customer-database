@@ -3,10 +3,10 @@ using src.Customer;
 class Program
 {
     public static CustomerDatabase SetUpTest()
-    {   string path = "src/customers.csv";
-        var fh = new FileHelper(path);
-        fh.ReadFileAsync();
+    {
+        string path = "src/customers.csv";
         var customerDB = new CustomerDatabase();
+        customerDB.PopulateDatabase(path);
         Console.WriteLine($"customer db should have 1000 records: {customerDB.Count()}\n");
         return customerDB;
     }
