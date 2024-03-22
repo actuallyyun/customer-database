@@ -26,10 +26,15 @@ namespace src.Customer
             _customers.Clear();
         }
 
+        // populate db with csv data 
         public static void InitiateDatabase(Customer customer)
         {
             _customers.Add(customer);
         }
+
+        // make AddCustomer private
+        // Undo->AddCustomer
+        //Public OnAddCustomer => {AddCustomer,ClearRedo}
 
         public void AddCustomer(CustomerCreateDTO customerToAdd)
         {
@@ -41,6 +46,7 @@ namespace src.Customer
             {
                 throw new ExceptionHandler.NonNullableFieldException("Field must not be null.");
             }
+
 
             Customer newCustomer = new Customer(
                 customerToAdd.FirstName,
@@ -56,8 +62,9 @@ namespace src.Customer
             Action undo = () => _customers.Remove(newCustomer);
             Action redo = () => AddCustomer(customerToAdd);
             var command = new Command(undo, redo);
+            _redoStack.Clear();
             _undoStack.Push(command);
-            //UserAction.AddAction(new UserAction("add",newCustomer));
+
             UpdateDB();
             return;
         }
@@ -74,8 +81,9 @@ namespace src.Customer
             _customers.Remove(foundCustomer);
             Action undo = () => _customers.Add(foundCustomer);
             Action redo = () => _customers.Remove(foundCustomer);
+            _redoStack.Clear();
             _undoStack.Push(new Command(undo, redo));
-            //UserAction.AddAction(new UserAction("delete",id));
+
             UpdateDB();
             Console.WriteLine($"Customer with id:{id} removed.");
         }
@@ -104,7 +112,7 @@ namespace src.Customer
                         )
                     );
                 Action redo = () => foundCustomer.UpdateCustomer(customerUpdate);
-                
+                _redoStack.Clear();
                 _undoStack.Push(new Command(undo, redo));
 
                 UpdateDB();
@@ -124,7 +132,7 @@ namespace src.Customer
             _undoStack.TryPop(out Command command);
             if (command is not null)
             {
-                command.undo();
+                command.Undo();
                 _redoStack.Push(command);
             }
         }
@@ -134,11 +142,12 @@ namespace src.Customer
             _redoStack.TryPop(out Command command);
             if (command is not null)
             {
-                command.redo();
+                command.Redo();
                 _undoStack.Push(command);
             }
         }
 
+    // update db after each data munipulatation
         public static void UpdateDB()
         {
             try

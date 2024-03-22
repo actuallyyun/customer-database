@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace src.Customer
 {
+ // Command for undo function. execute undo, and unexecute undo.
     public class Command
     {
         public Action Execute{get;set;}
@@ -15,11 +16,11 @@ namespace src.Customer
             Execute=execute;
             UnExecute=unExecute;
         }
-        public void undo(){
+        public void Undo(){
             Execute.Invoke();
         }
 
-        public void redo(){
+        public void Redo(){
             UnExecute.Invoke();
         }
 

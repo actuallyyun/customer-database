@@ -9,11 +9,16 @@ namespace src.Customer
 {
     public class FileHelper
     {
-        public async void ReadFileAsync(string path)
+        private readonly string _initialDataPath;
+
+        public FileHelper(string path){
+            _initialDataPath=path;
+        }
+        public async void ReadFileAsync()
         {
             try
             {
-                using (var reader = new StreamReader(path))
+                using (var reader = new StreamReader(_initialDataPath))
                 {
                     // first line is header, parse header
                     var header= reader.ReadLine();
@@ -48,16 +53,6 @@ namespace src.Customer
                         await sw.WriteLineAsync($"{customer.Id},{customer.FirstName},{customer.LastName},{customer.Email},{customer.Address}");
                     }
                 }
-            }else{
-                //it exits,delete it
-                try{
-                    File.Delete(path);
-                }catch(Exception e){
-                    Console.WriteLine("Cannot delete file");
-                    Console.WriteLine(e.Message);
-                }
-                
-
             }
         }
     }
