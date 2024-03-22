@@ -9,19 +9,24 @@ namespace src.Customer
 {
     public class FileHelper
     {
-        public async void ReadFileAsync(string path)
+        private readonly string _initialDataPath;
+        private static readonly string DB_FILE_PATH="src/customers_db.csv";
+
+        public FileHelper(string path){
+            _initialDataPath=path;
+        }
+        public async void ReadFileAsync()
         {
             try
             {
-                using (var reader = new StreamReader(path))
+                using (var reader = new StreamReader(_initialDataPath))
                 {
                     // first line is header, parse header
-                    var header= reader.ReadLine();
+                    var header= await reader.ReadLineAsync();
                     
                     string line;
-                    while ((line = reader.ReadLine()) is not null)
+                    while ((line = await reader.ReadLineAsync()) is not null)
                     {
-
                         string[] args = line.Split(",");
                         Guid id= Guid.Parse(args[0]);
                         Customer customer = new Customer(args[1], args[2], args[3],args[4],id);
@@ -37,27 +42,17 @@ namespace src.Customer
         }
 
         public async static void WriteFileAsync(IEnumerable<Customer> customers){
-            string path="src/customers_db.csv";
+            string path=FileHelper.DB_FILE_PATH;
 
             // if it doesn't exit, create the file and write data
             if(!File.Exists(path)){
                 using (StreamWriter sw=File.CreateText(path)){
-                    string header=$"";
-                    sw.WriteLine("Id,FirstName,LastName,Email,Address"); //write header. hardcoded, should get it from customers
+               
+                    sw.WriteLine("Id,FirstName,LastName,Email,Address"); //write header. 
                     foreach(var customer in customers){
                         await sw.WriteLineAsync($"{customer.Id},{customer.FirstName},{customer.LastName},{customer.Email},{customer.Address}");
                     }
                 }
-            }else{
-                //it exits,delete it
-                try{
-                    File.Delete(path);
-                }catch(Exception e){
-                    Console.WriteLine("Cannot delete file");
-                    Console.WriteLine(e.Message);
-                }
-                
-
             }
         }
     }
