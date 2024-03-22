@@ -20,6 +20,7 @@ namespace src.Customer
             try
             {
                 using (var reader = new StreamReader(_initialDataPath))
+                using (var reader = new StreamReader(_initialDataPath))
                 {
                     // first line is header, parse header
                     var header= await reader.ReadLineAsync();
